@@ -1,4 +1,5 @@
 from search import *
+#from utils import FIFOQueue
 
 class CleanUp(Problem):
     
@@ -79,13 +80,12 @@ class CleanUp(Problem):
                 
         
     def h(self, node):
-        hval = 0
-        for action in self.action_list:
-            s_ones=self.get_s_ones(node.state, action)
-            if(s_ones>0):
-                hval += (4-s_ones)/(4*self.get_ones(node.state))
-        
-        return hval
+        # hval = 0
+        # for action in self.action_list:
+        #     s_ones=self.get_s_ones(node.state, action)
+        #     if(s_ones>0):
+        #         hval += (4-s_ones)/(4*self.get_ones(node.state))
+        raise NotImplementedError
     
     def actions(self, state):
         """Return the actions that can be executed in the given
@@ -122,6 +122,19 @@ class CleanUp(Problem):
         list, as specified in the constructor. Override this method if
         checking against a single self.goal is not enough."""
         return state == self.goal
+        
+class CleanUpH1(CleanUp):
+    def __init__(self, initial, goal=None):
+        super().__init__(initial)
+        
+    def h(self, node):
+        hval = 0
+        for action in self.action_list:
+            s_ones=self.get_s_ones(node.state, action)
+            if(s_ones>0):
+                hval += (4-s_ones)/(4*self.get_ones(node.state))
+        
+        return hval
 
 def s_print(state):
     """ Print the state as a matrix. """
@@ -139,18 +152,24 @@ state = ((0, 1, 0, 1),
          (0, 1, 0, 1),
          (0, 0, 0, 0))
          
-c = CleanUp(state)
+#c = CleanUp(state)
+
+c = CleanUpH1(state)
 
 # s_print(c.initial)
 # s_print(c.result(state, (1,0)))
-
+print("Breadth First Tree Search")
 n1 = breadth_first_tree_search(c)
 for node in n1.path():
     s_print(node.state)
+print()
     
+print("A* Search")
 n2 = astar_search(c)
 for node in n2.path():
     s_print(node.state)
+print()
+
 # f.append(Node(c.initial))
 # n=f.pop()
 # f.extend(n.expand(c))
