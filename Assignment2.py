@@ -133,7 +133,7 @@ class CleanUpH1(CleanUp):
         for action in self.action_list:
             s_ones=self.get_s_ones(node.state, action)
             if(s_ones>0):
-                hval += (4-s_ones)/(4*self.get_ones(node.state))
+                hval += (4-s_ones)#/(4*self.get_ones(node.state))
         
         return hval
         
@@ -172,46 +172,71 @@ def s_print(state):
 #          (0, 0, 1, 1, 0),
 #         )
 
-state = ((0,0,0,0,0,0,0,0,0,0,0),
-         (0,0,0,0,0,0,0,0,0,0,0),
-         (0,0,0,0,0,0,0,0,0,0,0),
-         (0,0,0,0,0,0,0,1,0,0,0),
-         (0,0,0,0,0,0,1,0,1,0,0),
-         (0,0,0,0,0,0,0,1,0,0,0),
-         (0,0,0,0,0,0,0,1,0,0,0),
-         (0,0,0,0,0,0,1,0,1,0,0),
-         (0,0,0,0,0,0,0,1,0,0,0),
-         (0,0,0,0,0,0,0,0,0,0,0),
-         (0,0,0,0,0,0,0,0,0,0,0))
+# state = ((0,0,0,0,0,0,0,0,0,0,0),
+#          (0,0,0,0,0,0,0,0,0,0,0),
+#          (0,0,0,0,0,0,0,0,0,0,0),
+#          (0,0,0,0,0,0,0,1,0,0,0),
+#          (0,0,0,0,0,0,1,0,1,0,0),
+#          (0,0,0,0,0,0,0,1,0,0,0),
+#          (0,0,0,0,0,0,0,1,0,0,0),
+#          (0,0,0,0,0,0,1,0,1,0,0),
+#          (0,0,0,0,0,0,0,1,0,0,0),
+#          (0,0,0,0,0,0,0,0,0,0,0),
+#          (0,0,0,0,0,0,0,0,0,0,0))
+
+state = ((1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1),
+         (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0),
+         (1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1),
+         (0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0),
+         (0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0),
+         (0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0),
+         (0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0),
+         (1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0),
+         (1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0),
+         (1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+         (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        )
          
 #c = CleanUp(state)
 start_time = time.time()
-#c = CleanUpH1(state)
-c = CleanUpH2(state)
+c1 = CleanUpH1(state)
+c2 = CleanUpH2(state)
 
 # s_print(c.initial)
 # s_print(c.result(state, (1,0)))
 
-print("Breadth First Tree Search")
-n1 = breadth_first_tree_search(c)
-for node in n1.path():
-    s_print(node.state)
-print()
-#     
+# print("Breadth First Tree Search")
+# n = breadth_first_tree_search(c)
+# for node in n1.path():
+#     s_print(node.state)
+# print()
+  
 
-# print("A* Search")
-# n2 = astar_search(c)
-# for node in n2.path():
+print("A* Search, Heuristic 1")
+start_time1 = time.time()
+n1 = astar_search(c1)
+print("--- %s seconds ---" % (time.time() - start_time1))
+print("Path cost: ", n1.path_cost)
+print()
+# for node in n1.path():
 #     s_print(node.state)
 # print()
 
-# print("A* Search")
-# n2 = astar_search(c)
+
+
+print("A* Search, Heuristic 2")
+start_time2 = time.time()
+n2 = astar_search(c2)
+print("--- %s seconds ---" % (time.time() - start_time2))
+print("Path cost: ", n2.path_cost)
+print()
+
 # for node in n2.path():
 #     s_print(node.state)
 # print()
 
 print("--- %s seconds ---" % (time.time() - start_time))
+
 # f.append(Node(c.initial))
 # n=f.pop()
 # f.extend(n.expand(c))
