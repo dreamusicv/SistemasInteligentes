@@ -1,7 +1,7 @@
 from search import *
 #from utils import FIFOQueue
 import time
-start_time = time.time()
+
 
 class CleanUp(Problem):
     
@@ -176,7 +176,7 @@ state = ((1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1),
         )
          
 #c = CleanUp(state)
-
+start_time = time.time()
 c = CleanUpH1(state)
 
 # s_print(c.initial)
