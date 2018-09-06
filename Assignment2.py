@@ -1,5 +1,4 @@
 from search import *
-#from utils import FIFOQueue
 
 class CleanUp(Problem):
     
