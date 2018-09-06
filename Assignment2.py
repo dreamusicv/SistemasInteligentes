@@ -1,5 +1,7 @@
 from search import *
 #from utils import FIFOQueue
+import time
+start_time = time.time()
 
 class CleanUp(Problem):
     
@@ -135,6 +137,19 @@ class CleanUpH1(CleanUp):
                 hval += (4-s_ones)/(4*self.get_ones(node.state))
         
         return hval
+        
+class CleanUpH2(CleanUp):
+    def __init__(self, initial, goal=None):
+        super().__init__(initial)
+        
+    def h(self, node):
+        hval = 0
+        for action in self.action_list:
+            s_ones=self.get_s_ones(node.state, action)
+            if(s_ones>0):
+                hval += (4-s_ones)/(4*self.get_ones(node.state))
+        
+        return hval
 
 def s_print(state):
     """ Print the state as a matrix. """
@@ -147,10 +162,18 @@ state = ((0, 1, 0, 1),
          (0, 1, 0, 1),
          (0, 0, 0, 0))
          
-state = ((0, 1, 0, 1),
-         (1, 0, 0, 0),
-         (0, 1, 0, 1),
-         (0, 0, 0, 0))
+state = ((1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1),
+         (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0),
+         (1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1),
+         (0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0),
+         (0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0),
+         (0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0),
+         (0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0),
+         (1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0),
+         (1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0),
+         (1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+         (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        )
          
 #c = CleanUp(state)
 
@@ -158,18 +181,19 @@ c = CleanUpH1(state)
 
 # s_print(c.initial)
 # s_print(c.result(state, (1,0)))
-print("Breadth First Tree Search")
-n1 = breadth_first_tree_search(c)
-for node in n1.path():
-    s_print(node.state)
-print()
-    
+# print("Breadth First Tree Search")
+# n1 = breadth_first_tree_search(c)
+# for node in n1.path():
+#     s_print(node.state)
+# print()
+#     
 print("A* Search")
 n2 = astar_search(c)
 for node in n2.path():
     s_print(node.state)
 print()
 
+print("--- %s seconds ---" % (time.time() - start_time))
 # f.append(Node(c.initial))
 # n=f.pop()
 # f.extend(n.expand(c))
