@@ -53,10 +53,11 @@ class CleanUp(Problem):
         
     def get_s_zeros(self, state, action):
         z = 0
-        for pos in self.get_surroundings(action):
+        valid_pos = self.get_surroundings(action)
+        for pos in valid_pos:
             if(state[pos[0]][pos[1]]==0):
                 z+=1
-        return z
+        return [z, 4-len(valid_pos)]
     
     def get_s_ones(self, state, action):
         o = 0
@@ -124,6 +125,14 @@ class CleanUp(Problem):
         checking against a single self.goal is not enough."""
         return state == self.goal
         
+class CleanUpHTrivial(CleanUp):
+    def __init__(self, initial, goal=None):
+        super().__init__(initial)
+        
+    def h(self, node):
+        
+        return self.get_ones(node.state)
+        
 class CleanUpH1(CleanUp):
     def __init__(self, initial, goal=None):
         super().__init__(initial)
@@ -136,14 +145,36 @@ class CleanUpH1(CleanUp):
                 hval += (4-s_ones)#/(4*self.get_ones(node.state))
         
         return hval
+
         
 class CleanUpH2(CleanUp):
     def __init__(self, initial, goal=None):
         super().__init__(initial)
         
     def h(self, node):
+        hval = 0
+        for action in self.action_list:
+            [s_zeros, s_walls]=self.get_s_zeros(node.state, action)
+            if not((s_zeros==4) or (s_zeros==2 and s_walls==2) or (s_zeros==3 and s_walls==1)):
+                #print(s_zeros)
+                hval += s_zeros#/(4*self.get_ones(node.state))
+        return hval
         
-        return self.get_ones(node.state)
+class CleanUpH3(CleanUp):
+    def __init__(self, initial, goal=None):
+        super().__init__(initial)
+        
+    def h(self, node):
+        hval = 0
+        tballs = self.get_ones(node.state)
+        for action in self.action_list:
+            s_ones=self.get_s_ones(node.state, action)
+            if(s_ones>0):
+                hval += (4-s_ones)/(4*tballs)
+        
+        return hval
+
+
 
 def s_print(state):
     """ Print the state as a matrix. """
@@ -152,10 +183,15 @@ def s_print(state):
     print()
 
 # state = ((0, 1, 0, 1),
-#          (1, 0, 0, 0),
-#          (0, 1, 0, 1),
-#          (0, 0, 0, 0))
-         
+#           (1, 0, 0, 0),
+#           (0, 1, 0, 1),
+#           (0, 0, 0, 0))
+
+# state = ( (0, 0, 0, 0),
+#           (0, 0, 0, 0),
+#           (0, 0, 0, 1),
+#           (0, 0, 1, 0))
+          
 # state = ((0, 1, 0, 0, 1, 0, 1),
 #          (1, 0, 1, 0, 1, 0, 0),
 #          (1, 1, 0, 1, 1, 1, 1),
@@ -172,35 +208,76 @@ def s_print(state):
 #          (0, 0, 1, 1, 0),
 #         )
 
-# state = ((0,0,0,0,0,0,0,0,0,0,0),
-#          (0,0,0,0,0,0,0,0,0,0,0),
-#          (0,0,0,0,0,0,0,0,0,0,0),
-#          (0,0,0,0,0,0,0,1,0,0,0),
-#          (0,0,0,0,0,0,1,0,1,0,0),
-#          (0,0,0,0,0,0,0,1,0,0,0),
-#          (0,0,0,0,0,0,0,1,0,0,0),
-#          (0,0,0,0,0,0,1,0,1,0,0),
-#          (0,0,0,0,0,0,0,1,0,0,0),
-#          (0,0,0,0,0,0,0,0,0,0,0),
-#          (0,0,0,0,0,0,0,0,0,0,0))
+state = ((0,0,0,0,0,0,0,0,0,0,0),
+          (0,0,0,0,0,0,0,0,0,0,0),
+          (0,0,0,0,0,0,0,0,0,0,0),
+          (0,0,0,0,0,0,0,1,0,0,0),
+          (0,0,0,0,0,0,1,0,1,0,0),
+          (0,0,0,0,0,0,0,1,0,0,0),
+          (0,0,0,0,0,0,0,1,0,0,0),
+          (0,0,0,0,0,0,1,0,1,0,0),
+          (0,0,0,0,0,0,0,1,0,1,0),
+          (0,0,0,0,0,0,0,0,1,0,0),
+          (0,0,0,0,0,0,0,0,0,0,0))
 
-state = ((1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1),
-         (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0),
-         (1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1),
-         (0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0),
-         (0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0),
-         (0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0),
-         (0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0),
-         (1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0),
-         (1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0),
-         (1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0),
-         (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        )
+# ^         
+# A* Search, Heuristic 1
+# --- 0.09370851516723633 seconds ---
+# Path cost:  2
+# 
+# A* Search, Heuristic 2
+# --- 0.09374380111694336 seconds ---
+# Path cost:  2
+# 
+# A* Search, Heuristic 3
+# --- 33.07982635498047 seconds ---
+# Path cost:  2
+
+# state = ((1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1),
+#           (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0),
+#           (1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1),
+#           (0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0),
+#           (0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0),
+#           (0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0),
+#           (0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0),
+#           (1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0),
+#           (1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0),
+#           (1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+#           (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+#         ) #solo 1 y 2
+
+# state = ((0,0,0,0,0,0,0,1,0,0,0),
+#          (0,0,1,0,1,0,0,1,1,0,0),
+#          (0,0,0,1,0,1,1,1,1,0,0),
+#          (1,0,0,1,0,0,0,1,0,0,0),
+#          (0,1,0,0,1,0,0,0,0,0,0),
+#          (1,0,0,0,0,0,0,0,0,0,1),
+#          (0,0,0,0,0,0,0,0,0,1,0),
+#          (0,0,0,0,0,0,0,0,1,1,1),
+#          (0,0,0,0,1,0,0,1,1,1,1),
+#          (1,0,0,1,0,1,0,0,1,0,0),
+#          (0,1,0,0,1,0,0,0,1,0,1))
+
+# state = ((1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1),
+#          (0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0),
+#          (1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1),
+#          (0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+#          (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+#          (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+#          (0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0),
+#          (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+#          (0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+#          (0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1),
+#          (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1))
+
          
 #c = CleanUp(state)
-start_time = time.time()
+#start_time = time.time()
+
 c1 = CleanUpH1(state)
 c2 = CleanUpH2(state)
+c3 = CleanUpH3(state)
+ct = CleanUpHTrivial(state)
 
 # s_print(c.initial)
 # s_print(c.result(state, (1,0)))
@@ -210,6 +287,8 @@ c2 = CleanUpH2(state)
 # for node in n1.path():
 #     s_print(node.state)
 # print()
+
+
   
 
 print("A* Search, Heuristic 1")
@@ -230,15 +309,27 @@ n2 = astar_search(c2)
 print("--- %s seconds ---" % (time.time() - start_time2))
 print("Path cost: ", n2.path_cost)
 print()
-
 # for node in n2.path():
 #     s_print(node.state)
 # print()
 
-print("--- %s seconds ---" % (time.time() - start_time))
+print("A* Search, Heuristic 3")
+start_time3 = time.time()
+n3 = astar_search(c3)
+print("--- %s seconds ---" % (time.time() - start_time3))
+print("Path cost: ", n3.path_cost)
+print() 
 
-# f.append(Node(c.initial))
+
+#print("--- %s seconds ---" % (time.time() - start_time))
+
+# Pruebas
+# f =FIFOQueue()
+# f.append(Node(c2.initial))
 # n=f.pop()
+# print(c2.h(n))
+
+
 # f.extend(n.expand(c))
 # n=f.pop()
 
